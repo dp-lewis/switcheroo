@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 // Hardcoded puzzles for 7 days (famous movie quotes)
@@ -87,6 +87,26 @@ function App() {
   const [solved, setSolved] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
 
+  // Deep link: set puzzle from URL hash (e.g. #puzzle-2)
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash.startsWith('#puzzle-')) {
+      const idx = parseInt(hash.replace('#puzzle-', ''), 10)
+      if (!isNaN(idx) && idx >= 0 && idx < PUZZLES.length) {
+        setActivePuzzleIdx(idx)
+        setWords([...PUZZLES[idx].scrambled])
+        setSelected(null)
+        setSwaps(0)
+        setSolved(false)
+      }
+    }
+  }, [])
+
+  // When puzzle changes, update URL hash
+  useEffect(() => {
+    window.location.hash = `#puzzle-${activePuzzleIdx}`
+  }, [activePuzzleIdx])
+
   // When active puzzle changes, reset state
   const handleSelectPuzzle = (idx) => {
     setActivePuzzleIdx(idx)
@@ -130,28 +150,6 @@ function App() {
       <h1>Switcheroo</h1>
       <p className="subtitle">Swap, solve, and savour—one perfect sentence every day.</p>
       <div className="clue">Clue: <strong>{PUZZLES[activePuzzleIdx].theme}</strong></div>
-      <button className="history-toggle" onClick={() => setShowHistory(!showHistory)}>
-        {showHistory ? 'Hide Puzzle Archive' : 'Show Puzzle Archive'}
-      </button>
-      {showHistory && (
-        <div className="history-list">
-          <h3>Puzzle Archive</h3>
-          <ul>
-            {PUZZLES.map((puzzle, i) => {
-              // Calculate which day this puzzle would be, starting with today at index 0
-              const idx = (activePuzzleIdx - i + PUZZLES.length) % PUZZLES.length
-              const date = getDateNDaysAgo(i)
-              return (
-                <li key={idx} style={{fontWeight: idx === activePuzzleIdx ? 'bold' : 'normal'}}>
-                  <button onClick={() => handleSelectPuzzle(idx)} style={{background:'none',border:'none',color:'#2563eb',cursor:'pointer',textDecoration:'underline',fontWeight: idx === activePuzzleIdx ? 'bold' : 'normal'}}>
-                    {formatDate(date)}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      )}
       <div className="sentence">
         {words.map((word, idx) => (
           <button
@@ -178,6 +176,27 @@ function App() {
           <p>"{PUZZLES[activePuzzleIdx].solution.join(' ')}"</p>
           <p><em>Source: {PUZZLES[activePuzzleIdx].source}</em></p>
           <p>Solved in {swaps} swaps!</p>
+        </div>
+      )}
+      <button className="history-toggle" onClick={() => setShowHistory(!showHistory)}>
+        {showHistory ? 'Hide Puzzle Archive' : 'Show Puzzle Archive'}
+      </button>
+      {showHistory && (
+        <div className="history-list">
+          <h3>Puzzle Archive</h3>
+          <ul>
+            {PUZZLES.map((puzzle, i) => {
+              const idx = (activePuzzleIdx - i + PUZZLES.length) % PUZZLES.length
+              const date = getDateNDaysAgo(i)
+              return (
+                <li key={idx} style={{fontWeight: idx === activePuzzleIdx ? 'bold' : 'normal'}}>
+                  <button onClick={() => handleSelectPuzzle(idx)} style={{background:'none',border:'none',color:'#2563eb',cursor:'pointer',textDecoration:'underline',fontWeight: idx === activePuzzleIdx ? 'bold' : 'normal'}}>
+                    {formatDate(date)}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       )}
     </div>
