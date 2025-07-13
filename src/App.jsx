@@ -3,8 +3,8 @@ import './App.css'
 
 // Hardcoded puzzle for prototype
 const PUZZLE = {
-  solution: ['The', 'Sun', 'rises', 'in', 'the', 'east.'],
-  scrambled: ['Sun', 'the', 'rises', 'east.', 'the', 'in'],
+  solution: ['the', 'sun', 'rises', 'in', 'the', 'east'],
+  scrambled: ['sun', 'the', 'rises', 'east', 'the', 'in'],
   minSwaps: 2,
 }
 
